@@ -49,7 +49,7 @@ Data flows in one direction: **trigger → recorder → whisper-client → note-
 Format: `YYYY-MM-DD HH-MM-SS__<context>.md`
 
 - Colons replaced with dashes (Windows filesystem compatibility)
-- `<context>` = first ~40 characters of the transcript, stripped of special characters
+- `<context>` = transcript truncated to 50 characters at the nearest word boundary, stripped of special characters
 - Example: `2026-05-19 14-32-55__the quarterly review is next week and I want to.md`
 - Created in a configurable vault folder (default: vault root)
 
@@ -61,7 +61,7 @@ A toggle in settings selects between two modes. Both modes share `whisper-client
 
 ### Manual Mode
 
-User installs and manages the whisper server themselves. Plugin provides:
+User installs and manages the whisper server themselves. Recommended backend: `faster-whisper-server` (pip-installable, requires Python). Plugin provides:
 - Step-by-step install guide for `faster-whisper-server` (pip-based, OpenAI-compatible API) with copy-pasteable commands
 - A **Start Server** button that runs the configured start command via Node.js `child_process`
 - Optional: auto-start the server when Obsidian launches (runs the same command)
@@ -76,8 +76,8 @@ faster-whisper-server --model small
 
 ### Auto Mode
 
-Plugin manages the full lifecycle:
-- On first enable, downloads the `whisper.cpp` Windows binary from GitHub releases and the selected model file
+Plugin manages the full lifecycle using `whisper.cpp` (pre-built Windows binaries available on GitHub releases — no Python required, suitable for automated download):
+- On first enable, downloads the `whisper.cpp` Windows binary and the selected model file
 - Files stored in the plugin data folder (`.obsidian/plugins/obsidian-speech2text/bin/`)
 - Server starts automatically when Obsidian opens, stops when it closes
 - Settings shows download progress, model size selector with speed/accuracy tradeoffs noted (tiny → large)
