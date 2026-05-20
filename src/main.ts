@@ -34,7 +34,7 @@ class TranscribeModal extends Modal {
 }
 
 export default class SpeechToTextPlugin extends Plugin {
-  settings: PluginSettings;
+  settings: PluginSettings = DEFAULT_SETTINGS;
 
   async onload(): Promise<void> {
     await this.loadSettings();
