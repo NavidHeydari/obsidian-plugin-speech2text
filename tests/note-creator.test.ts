@@ -42,7 +42,12 @@ describe('buildContext', () => {
   });
 
   it('collapses multiple spaces', () => {
-    expect(buildContext('hello   world')).toBe('hello   world');
+    expect(buildContext('hello   world')).toBe('hello world');
+  });
+
+  it('falls back to truncation when first word is ≥50 chars', () => {
+    const longWord = 'a'.repeat(55);
+    expect(buildContext(longWord)).toBe('a'.repeat(50));
   });
 });
 

@@ -11,16 +11,16 @@ export function truncateAtWordBoundary(text: string, maxLen: number): string {
 }
 
 export function buildContext(transcript: string): string {
-  const clean = transcript.replace(/[^a-zA-Z0-9 ]/g, '').trim();
-  if (clean.length < 50) return clean;
-  const words = clean.split(' ');
+  const clean = transcript.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+  // word-by-word accumulation
   let result = '';
-  for (const word of words) {
+  for (const word of clean.split(' ')) {
     const candidate = result ? `${result} ${word}` : word;
     if (candidate.length >= 50) break;
     result = candidate;
   }
-  return result;
+  // fallback: first word is ≥ 50 chars — hard-truncate it
+  return result || truncateAtWordBoundary(clean, 50);
 }
 
 export function buildNoteName(transcript: string, now = new Date()): string {
@@ -44,8 +44,15 @@ export async function createNote(
   const path = buildNotePath(settings.outputFolder, name);
 
   const folderPath = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
-  if (folderPath && !app.vault.getAbstractFileByPath(folderPath)) {
-    await app.vault.createFolder(folderPath);
+  if (folderPath) {
+    // Create all missing ancestor folders
+    const segments = folderPath.split('/');
+    for (let i = 1; i <= segments.length; i++) {
+      const partial = segments.slice(0, i).join('/');
+      if (!app.vault.getAbstractFileByPath(partial)) {
+        await app.vault.createFolder(partial);
+      }
+    }
   }
 
   await app.vault.create(path, transcript);
