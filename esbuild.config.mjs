@@ -7,6 +7,7 @@ const ctx = await esbuild.context({
   bundle: true,
   external: ['obsidian', 'electron', '@codemirror/*', '@lezer/*'],
   format: 'cjs',
+  platform: 'node',
   target: 'es2018',
   outfile: 'main.js',
   minify: prod,

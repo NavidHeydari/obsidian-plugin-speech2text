@@ -17,6 +17,9 @@ export class Setting {
   setName = jest.fn(() => this);
   setDesc = jest.fn(() => this);
   addText = jest.fn((_cb: any) => this);
+  addToggle = jest.fn((_cb: any) => this);
+  addDropdown = jest.fn((_cb: any) => this);
+  addButton = jest.fn((_cb: any) => this);
 }
 
 export class Notice {
