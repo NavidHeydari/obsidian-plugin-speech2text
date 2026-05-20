@@ -62,4 +62,23 @@ describe('transcribeAudio', () => {
     const body: FormData = (fetch as jest.Mock).mock.calls[0][1].body;
     expect(body.get('language')).toBe('fa');
   });
+
+  it('throws a friendly error when fetch rejects (server not running)', async () => {
+    (fetch as jest.Mock).mockRejectedValue(new TypeError('Failed to fetch'));
+
+    await expect(
+      transcribeAudio(new Blob(['audio']), 'test.mp3', DEFAULT_SETTINGS),
+    ).rejects.toThrow('Cannot reach Whisper server');
+  });
+
+  it('throws when response JSON has no text field', async () => {
+    (fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ error: 'model not found' }),
+    });
+
+    await expect(
+      transcribeAudio(new Blob(['audio']), 'test.mp3', DEFAULT_SETTINGS),
+    ).rejects.toThrow('unexpected response format');
+  });
 });
