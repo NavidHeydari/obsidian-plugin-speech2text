@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-speech2text",
+  "name": "Speech2Text",
+  "version": "0.1.0",
+  "minAppVersion": "1.0.0",
+  "description": "Transcribe audio files via a local Whisper server and save as timestamped notes.",
+  "author": "navidheydari",
+  "authorUrl": "",
+  "isDesktopOnly": true
+}
