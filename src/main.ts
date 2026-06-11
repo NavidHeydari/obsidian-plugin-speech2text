@@ -38,6 +38,7 @@ export default class SpeechToTextPlugin extends Plugin {
   onunload(): void {
     this.controlServer?.stop();
     if (this.recorder?.getState() !== 'idle') {
+      new Notice('Speech2Text: recording discarded — Obsidian is closing');
       this.recorder.stop().catch(() => {});
     }
   }

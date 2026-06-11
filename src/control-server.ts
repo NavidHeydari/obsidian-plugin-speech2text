@@ -15,6 +15,7 @@ export class ControlServer {
     this.server = http.createServer(this.handleRequest.bind(this));
     this.server.on('error', (err: NodeJS.ErrnoException) => {
       if (err.code === 'EADDRINUSE') {
+        this.server = null;
         this.onError(
           `Speech2Text: control server failed to start — port ${this.port} already in use`,
         );

@@ -5,6 +5,7 @@ export class RecordingPanel extends Modal {
   private startBtn!: HTMLButtonElement;
   private pauseBtn!: HTMLButtonElement;
   private stopBtn!: HTMLButtonElement;
+  private browseBtn!: HTMLButtonElement;
   private statusEl!: HTMLElement;
 
   constructor(
@@ -29,7 +30,7 @@ export class RecordingPanel extends Modal {
     const sep = contentEl.createEl('p', { text: '── or ──' });
     sep.style.cssText = 'text-align:center;color:var(--text-muted);margin:8px 0;';
 
-    const browseBtn = contentEl.createEl('button', { text: '📂 Browse File' });
+    this.browseBtn = contentEl.createEl('button', { text: '📂 Browse File' });
 
     const fileInput = contentEl.createEl('input');
     fileInput.type = 'file';
@@ -70,7 +71,7 @@ export class RecordingPanel extends Modal {
       await this.transcribe(result.blob, result.fileName);
     };
 
-    browseBtn.onclick = () => fileInput.click();
+    this.browseBtn.onclick = () => fileInput.click();
 
     fileInput.onchange = async () => {
       const file = fileInput.files?.[0];
@@ -88,6 +89,7 @@ export class RecordingPanel extends Modal {
     this.startBtn.disabled = state !== 'idle';
     this.pauseBtn.disabled = state === 'idle';
     this.stopBtn.disabled = state === 'idle';
+    this.browseBtn.disabled = state !== 'idle';
 
     this.pauseBtn.textContent = state === 'paused' ? '▶ Resume' : '⏸ Pause';
 
@@ -100,6 +102,9 @@ export class RecordingPanel extends Modal {
   }
 
   onClose(): void {
+    if (this.recorder.getState() !== 'idle') {
+      this.recorder.stop().catch(() => {});
+    }
     this.contentEl.empty();
   }
 }

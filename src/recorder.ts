@@ -44,6 +44,7 @@ export class Recorder {
 
   async stop(): Promise<{ blob: Blob; fileName: string }> {
     if (this.state === 'idle') throw new Error('Not recording');
+    this.state = 'idle'; // mark done immediately to prevent re-entry
     return new Promise((resolve, reject) => {
       if (!this.mediaRecorder) return reject(new Error('No active recorder'));
       this.mediaRecorder.onstop = async () => {
