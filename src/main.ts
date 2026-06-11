@@ -37,6 +37,9 @@ export default class SpeechToTextPlugin extends Plugin {
 
   onunload(): void {
     this.controlServer?.stop();
+    if (this.recorder?.getState() !== 'idle') {
+      this.recorder.stop().catch(() => {});
+    }
   }
 
   async transcribe(blob: Blob, fileName: string): Promise<void> {
