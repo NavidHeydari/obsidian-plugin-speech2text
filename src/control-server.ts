@@ -26,8 +26,9 @@ export class ControlServer {
   stop(): Promise<void> {
     return new Promise(resolve => {
       if (!this.server) return resolve();
-      this.server.close(() => resolve());
+      const srv = this.server;
       this.server = null;
+      srv.close(() => resolve());
     });
   }
 
