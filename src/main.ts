@@ -15,7 +15,7 @@ class TranscribeModal extends Modal {
       text: 'Select an audio file (MP3, WAV, M4A, WebM, OGG, FLAC) to transcribe.',
     });
 
-    const input = document.createElement('input');
+    const input = contentEl.createEl('input');
     input.type = 'file';
     input.accept = '.mp3,.wav,.m4a,.webm,.ogg,.flac';
     input.style.marginTop = '1em';
@@ -25,7 +25,6 @@ class TranscribeModal extends Modal {
       this.close();
       this.onFile(file, file.name);
     };
-    contentEl.appendChild(input);
   }
 
   onClose(): void {

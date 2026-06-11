@@ -7,10 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 An Obsidian plugin for Windows that transcribes audio via a local Whisper server and saves the result as a timestamped note.
 
 **MVP 1:** Receive an MP3/audio file, transcribe via local Whisper server, save result as timestamped note.
-**MVP 2:** Guide the user through server installation from within the plugin; connect automatically.
-**MVP 3:** Full microphone capture triggered globally (even when Obsidian is not focused) via a small HTTP control server paired with an AutoHotkey script.
+**MVP 2:** Full microphone capture triggered globally (even when Obsidian is not focused) via a small HTTP control server paired with an AutoHotkey script.
+**MVP 3:** Guide the user through server installation from within the plugin; connect automatically.
 
-**Status:** Pre-implementation. Design spec is finalized; no source files exist yet. Implement MVP 1 first.
+
+**Status:** MVP 1 complete. MVP 2 and MVP 3 not yet started.
 
 Design spec: `docs/superpowers/specs/2026-05-19-speech2text-design.md`
 Implementation plan: `docs/superpowers/plans/2026-05-19-speech2text.md` (to be written)

@@ -18,13 +18,12 @@ export async function transcribeAudio(
       method: 'POST',
       body: form,
     });
-
-    if (!response.ok) {
-      throw new Error(`Whisper server error: ${response.status} ${response.statusText}`);
-    }
-  } catch (err) {
-    if (err instanceof Error && err.message.includes('Whisper server error')) throw err;
+  } catch {
     throw new Error(`Cannot reach Whisper server at ${settings.serverUrl} — is it running?`);
+  }
+
+  if (!response.ok) {
+    throw new Error(`Whisper server error: ${response.status} ${response.statusText}`);
   }
 
   const json = (await response.json()) as { text?: string };
