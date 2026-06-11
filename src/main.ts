@@ -1,65 +1,48 @@
-import { App, Modal, Notice, Plugin } from 'obsidian';
+import { FileSystemAdapter, Notice, Plugin } from 'obsidian';
 import { DEFAULT_SETTINGS, PluginSettings, SpeechToTextSettingTab } from './settings';
 import { transcribeAudio } from './whisper-client';
 import { createNote } from './note-creator';
-
-class TranscribeModal extends Modal {
-  constructor(app: App, private onFile: (blob: Blob, name: string) => void) {
-    super(app);
-  }
-
-  onOpen(): void {
-    const { contentEl } = this;
-    contentEl.createEl('h2', { text: 'Transcribe Audio File' });
-    contentEl.createEl('p', {
-      text: 'Select an audio file (MP3, WAV, M4A, WebM, OGG, FLAC) to transcribe.',
-    });
-
-    const input = contentEl.createEl('input');
-    input.type = 'file';
-    input.accept = '.mp3,.wav,.m4a,.webm,.ogg,.flac';
-    input.style.marginTop = '1em';
-    input.onchange = () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      this.close();
-      this.onFile(file, file.name);
-    };
-  }
-
-  onClose(): void {
-    this.contentEl.empty();
-  }
-}
+import { Recorder } from './recorder';
+import { RecordingPanel } from './recording-panel';
+import { ControlServer } from './control-server';
 
 export default class SpeechToTextPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS;
+  private recorder!: Recorder;
+  private controlServer: ControlServer | null = null;
 
   async onload(): Promise<void> {
     await this.loadSettings();
     this.addSettingTab(new SpeechToTextSettingTab(this.app, this));
 
-    this.addRibbonIcon('microphone', 'Transcribe audio file', () => {
-      this.openTranscribeModal();
-    });
+    this.recorder = new Recorder(this.getPluginDir());
+    await this.recorder.cleanup();
 
-    this.addCommand({
-      id: 'transcribe-audio-file',
-      name: 'Transcribe audio file',
-      callback: () => this.openTranscribeModal(),
+    if (this.settings.controlServerEnabled) {
+      this.controlServer = new ControlServer(
+        this.settings.controlServerPort,
+        this.recorder,
+        () => this.stopAndTranscribe(),
+        msg => new Notice(msg),
+      );
+      this.controlServer.start();
+    }
+
+    this.addRibbonIcon('microphone', 'Speech2Text', () => {
+      new RecordingPanel(this.app, this.recorder, (blob, fileName) =>
+        this.transcribe(blob, fileName),
+      ).open();
     });
   }
 
-  private openTranscribeModal(): void {
-    new TranscribeModal(this.app, (blob, name) => {
-      this.transcribe(blob, name);
-    }).open();
+  onunload(): void {
+    this.controlServer?.stop();
   }
 
-  async transcribe(audioBlob: Blob, fileName: string): Promise<void> {
+  async transcribe(blob: Blob, fileName: string): Promise<void> {
     const notice = new Notice('Transcribing…', 0);
     try {
-      const transcript = await transcribeAudio(audioBlob, fileName, this.settings);
+      const transcript = await transcribeAudio(blob, fileName, this.settings);
       const noteName = await createNote(this.app, transcript, this.settings);
       notice.hide();
       new Notice(`Saved → ${noteName}`);
@@ -67,6 +50,19 @@ export default class SpeechToTextPlugin extends Plugin {
       notice.hide();
       new Notice(`Transcription failed: ${(err as Error).message}`);
     }
+  }
+
+  private async stopAndTranscribe(): Promise<void> {
+    const { blob, fileName } = await this.recorder.stop();
+    await this.transcribe(blob, fileName);
+  }
+
+  private getPluginDir(): string {
+    const adapter = this.app.vault.adapter;
+    if (adapter instanceof FileSystemAdapter) {
+      return adapter.getFullPath(this.manifest.dir ?? '');
+    }
+    throw new Error('Speech2Text requires a local vault (desktop only)');
   }
 
   async loadSettings(): Promise<void> {
