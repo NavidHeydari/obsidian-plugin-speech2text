@@ -20,6 +20,7 @@ jest.mock('path', () => ({
 class FakeMediaRecorder {
   onstop: (() => void) | null = null;
   ondataavailable: ((e: { data: Blob }) => void) | null = null;
+  onerror: ((e: Event) => void) | null = null;
 
   constructor(public stream: MediaStream) {}
   start() {}
@@ -46,6 +47,7 @@ describe('Recorder state machine', () => {
     recorder = new Recorder('/fake/dir');
     mockGetUserMedia.mockClear();
     (fs.promises.writeFile as jest.Mock).mockClear();
+    (fs.promises.mkdir as jest.Mock).mockClear();
   });
 
   it('starts in idle state', () => {
@@ -110,6 +112,14 @@ describe('Recorder state machine', () => {
 
   it('stop() throws when called while idle', async () => {
     await expect(recorder.stop()).rejects.toThrow('Not recording');
+  });
+
+  it('transitions to idle after stop() from paused state', async () => {
+    await recorder.start();
+    recorder.pause();
+    const result = await recorder.stop();
+    expect(recorder.getState()).toBe('idle');
+    expect(result.blob).toBeInstanceOf(Blob);
   });
 });
 

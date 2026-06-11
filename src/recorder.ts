@@ -65,6 +65,9 @@ export class Recorder {
           reject(err);
         }
       };
+      this.mediaRecorder.onerror = (e: Event) => {
+        reject((e as any).error ?? new Error('MediaRecorder error'));
+      };
       this.mediaRecorder.stop();
     });
   }
@@ -82,8 +85,8 @@ export class Recorder {
             if (mtimeMs < cutoff) await fs.promises.unlink(filePath);
           }),
       );
-    } catch {
-      // recordings directory doesn't exist yet — ignore
+    } catch (err: unknown) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
     }
   }
 
