@@ -5,6 +5,7 @@ import { createNote } from './note-creator';
 import { Recorder } from './recorder';
 import { RecordingPanel } from './recording-panel';
 import { ControlServer } from './control-server';
+import { initLogger, logError } from './logger';
 
 export default class SpeechToTextPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS;
@@ -14,6 +15,8 @@ export default class SpeechToTextPlugin extends Plugin {
   async onload(): Promise<void> {
     await this.loadSettings();
     this.addSettingTab(new SpeechToTextSettingTab(this.app, this));
+
+    initLogger(this.getPluginDir(), this.settings.loggingEnabled);
 
     this.recorder = new Recorder(this.getPluginDir());
     await this.recorder.cleanup();
@@ -51,6 +54,7 @@ export default class SpeechToTextPlugin extends Plugin {
       notice.hide();
       new Notice(`Saved → ${noteName}`);
     } catch (err) {
+      await logError('main: transcribe failed', err, { fileName, serverUrl: this.settings.serverUrl });
       notice.hide();
       new Notice(`Transcription failed: ${(err as Error).message}`);
     }

@@ -1,20 +1,25 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import type SpeechToTextPlugin from './main';
+import { setLoggingEnabled } from './logger';
 
 export interface PluginSettings {
   serverUrl: string;
   outputFolder: string;
   language: string;
+  model: string;
   controlServerEnabled: boolean;
   controlServerPort: number;
+  loggingEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
   serverUrl: 'http://localhost:8000',
   outputFolder: '/',
   language: 'auto',
+  model: 'whisper-1',
   controlServerEnabled: true,
   controlServerPort: 27183,
+  loggingEnabled: true,
 };
 
 export class SpeechToTextSettingTab extends PluginSettingTab {
@@ -51,6 +56,18 @@ export class SpeechToTextSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
+      .setName('Model')
+      .setDesc('Model name sent to the Whisper server (e.g. whisper-1, base, small, medium, large-v3)')
+      .addText(text =>
+        text
+          .setValue(this.plugin.settings.model)
+          .onChange(async value => {
+            this.plugin.settings.model = value.trim() || 'whisper-1';
+            await this.plugin.saveSettings();
+          }),
+      );
+
+    new Setting(containerEl)
       .setName('Language')
       .setDesc('Language code (e.g. en, fa) or "auto" for auto-detect')
       .addText(text =>
@@ -60,6 +77,19 @@ export class SpeechToTextSettingTab extends PluginSettingTab {
             this.plugin.settings.language = value.trim() || 'auto';
             await this.plugin.saveSettings();
           }),
+      );
+
+    containerEl.createEl('h3', { text: 'Logging' });
+
+    new Setting(containerEl)
+      .setName('Enable logging')
+      .setDesc('Write detailed error logs to logs/speech2text.log in the plugin folder (for troubleshooting)')
+      .addToggle(toggle =>
+        toggle.setValue(this.plugin.settings.loggingEnabled).onChange(async value => {
+          this.plugin.settings.loggingEnabled = value;
+          setLoggingEnabled(value);
+          await this.plugin.saveSettings();
+        }),
       );
 
     containerEl.createEl('h3', { text: 'Control Server' });
