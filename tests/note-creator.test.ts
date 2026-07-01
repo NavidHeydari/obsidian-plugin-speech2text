@@ -49,6 +49,11 @@ describe('buildContext', () => {
     const longWord = 'a'.repeat(55);
     expect(buildContext(longWord)).toBe('a'.repeat(50));
   });
+
+  it('replaces runs of special chars between words with a single space', () => {
+    expect(buildContext('word1--word2')).toBe('word1 word2');
+    expect(buildContext('a!b@c')).toBe('a b c');
+  });
 });
 
 describe('buildNoteName', () => {

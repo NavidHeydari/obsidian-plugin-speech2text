@@ -35,3 +35,7 @@ export class Modal {
 }
 
 export class App {}
+
+export class FileSystemAdapter {
+  getFullPath = jest.fn((p: string) => `/vault/${p}`);
+}

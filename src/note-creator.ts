@@ -11,7 +11,7 @@ export function truncateAtWordBoundary(text: string, maxLen: number): string {
 }
 
 export function buildContext(transcript: string): string {
-  const clean = transcript.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+  const clean = transcript.replace(/[^a-zA-Z0-9]+/g, ' ').trim();
   // word-by-word accumulation
   let result = '';
   for (const word of clean.split(' ')) {
